@@ -10,6 +10,7 @@ class LocalizationData extends Translations {
       'English':'English',
       'Language_ref':'Language',
       'Edit':'Edit',
+      'White Theme':'White Theme',
       'Loading':'Loading'
     },
     'tr_TR':{
@@ -18,6 +19,7 @@ class LocalizationData extends Translations {
       'English':'İngilizce',
       'Language_ref':'Dil Tericihi',
       'Edit':'Düzenle',
+      'White Theme':'Beyaz Tema',
       'Loading':'Yükleniyor'
     }
   };

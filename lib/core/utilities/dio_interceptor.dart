@@ -1,0 +1,48 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+import 'package:drug_info_app/core/utilities/APIConnection.dart';
+import 'package:drug_info_app/models/token_model.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+
+class DioInterceptor extends Interceptor{
+  final _storage = GetStorage();
+  final _dio = Dio();
+  final _apiConnection = ApiConnection.instance;
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    
+    var userData =TokenModel.fromJson(jsonDecode(_storage.read("token"))); 
+    if(userData == null){
+       handler.next(options);
+    }
+    var userId = JwtDecoder.decode(userData.token)["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+    if(userData.expirationDate.isBefore(DateTime.now()) || userData.expirationDate.difference(DateTime.now()).inMinutes < 5){
+      _dio.post("${_apiConnection.url}Auth/RefreshToken", data: {
+        "refreshToken": userData.refreshToken,
+        "userId": userId,
+        "client": userData.clientId
+      }).then((value) {
+        var token = TokenModel.fromJson(value.data);
+        _storage.write("token", jsonEncode(token));
+        print(token.token);
+      });
+    }
+    
+    options.headers['Authorization'] = " Bearer ${userData.token}";
+    super.onRequest(options, handler);
+  }
+
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    // TODO: implement onResponse
+    super.onResponse(response, handler);
+  }
+
+  @override
+  void onError(DioError err, ErrorInterceptorHandler handler) {
+    // TODO: implement onError
+    super.onError(err, handler);
+  }
+}

@@ -14,9 +14,13 @@ class LaunchSettings {
     final box = GetStorage();
     
     var firstOpen = box.read('firstOpen') ?? true;
+    
     if(firstOpen){
       box.write("language", Get.locale?.languageCode ?? "en");
+      box.write("darkMode", false);
+      box.write("isLogin", false);
       box.write("firstOpen", false);
+      
     }
     // if(firstOpen == true){
     //   sp.setBool("notipermission", true);
