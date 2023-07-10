@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:drug_info_app/core/utilities/APIConnection.dart';
+import 'package:drug_info_app/core/utilities/jwt_helper.dart';
 import 'package:drug_info_app/models/token_model.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class DioInterceptor extends Interceptor{
+  final _jwtHelper = JwtHelper.instance;
   final _storage = GetStorage();
   final _dio = Dio();
   String? _token;
@@ -14,15 +16,14 @@ class DioInterceptor extends Interceptor{
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async{
-    String _token = _storage.read("token");
-    String refreshToken = _storage.read("refreshToken");
-    String client = _storage.read("client");
+    String? _token =await _jwtHelper.getToken();
+    String? refreshToken =await _jwtHelper.getRefreshToken();
+    String? client =await _jwtHelper.getClient();
     if(refreshToken == null){
        handler.next(options);
     }
-    var userId =await JwtDecoder.decode(_token)["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
-    DateTime expire = JwtDecoder.getExpirationDate(_token);
-    if(expire.isBefore(DateTime.now()) || expire.difference(DateTime.now()).inMinutes < 5){
+    var userId =await _jwtHelper.getUserId(_token!);
+    if(await _jwtHelper.isTokenExpired(_token)){
       var result =await _dio.post("${_apiConnection.url}Auth/RefreshToken", data: {
         "refreshToken": refreshToken,
         "userId": userId,
@@ -30,9 +31,9 @@ class DioInterceptor extends Interceptor{
       });
         
         var token = TokenModel.fromJson(result.data);
-        _storage.write("token", token.token);
-        _storage.write("client", token.clientId);
-        _storage.write("refreshToken", token.refreshToken);
+        _jwtHelper.setToken(token.token);
+        _jwtHelper.setRefreshToken(token.refreshToken);
+        _jwtHelper.setClient(token.clientId);
         _token = token.token;
     }
     options.headers['Authorization'] = " Bearer ${_token}";
