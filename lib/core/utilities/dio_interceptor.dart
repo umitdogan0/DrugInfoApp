@@ -9,28 +9,33 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 class DioInterceptor extends Interceptor{
   final _storage = GetStorage();
   final _dio = Dio();
+  String? _token;
   final _apiConnection = ApiConnection.instance;
+
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    
-    var userData =TokenModel.fromJson(jsonDecode(_storage.read("token"))); 
-    if(userData == null){
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async{
+    String _token = _storage.read("token");
+    String refreshToken = _storage.read("refreshToken");
+    String client = _storage.read("client");
+    if(refreshToken == null){
        handler.next(options);
     }
-    var userId = JwtDecoder.decode(userData.token)["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
-    if(userData.expirationDate.isBefore(DateTime.now()) || userData.expirationDate.difference(DateTime.now()).inMinutes < 5){
-      _dio.post("${_apiConnection.url}Auth/RefreshToken", data: {
-        "refreshToken": userData.refreshToken,
+    var userId =await JwtDecoder.decode(_token)["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+    DateTime expire = JwtDecoder.getExpirationDate(_token);
+    if(expire.isBefore(DateTime.now()) || expire.difference(DateTime.now()).inMinutes < 5){
+      var result =await _dio.post("${_apiConnection.url}Auth/RefreshToken", data: {
+        "refreshToken": refreshToken,
         "userId": userId,
-        "client": userData.clientId
-      }).then((value) {
-        var token = TokenModel.fromJson(value.data);
-        _storage.write("token", jsonEncode(token));
-        print(token.token);
+        "client": client
       });
+        
+        var token = TokenModel.fromJson(result.data);
+        _storage.write("token", token.token);
+        _storage.write("client", token.clientId);
+        _storage.write("refreshToken", token.refreshToken);
+        _token = token.token;
     }
-    
-    options.headers['Authorization'] = " Bearer ${userData.token}";
+    options.headers['Authorization'] = " Bearer ${_token}";
     super.onRequest(options, handler);
   }
 

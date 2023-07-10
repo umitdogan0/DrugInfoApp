@@ -66,7 +66,7 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-      if(searchController.value.isNullOrBlank != true) {
+      if(searchController.value.text != null) {
         drug = getDrugByName(searchController.value.text);
       }
       else {

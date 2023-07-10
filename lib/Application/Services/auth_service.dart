@@ -29,9 +29,12 @@ class LoginService extends ILoginService {
     
     try {
       var returnData =await _dio.post("${ac.url}Auth/Login", data: data);
-      _getStorage.write("token", returnData.data.toString());
+      var _success = TokenModel.fromJson(returnData.data);
+      _getStorage.write("token", _success.token.toString());
+      _getStorage.write("refreshToken", _success.refreshToken.toString());
+      _getStorage.write("client", _success.clientId.toString());
       _getStorage.write("isLogin", true);
-     return Success(TokenModel.fromJson(returnData.data));
+     return Success(_success);
     } on DioError catch (e) {
      return Error(ErrorHandling().handle(error: e));
     }
@@ -48,9 +51,12 @@ class LoginService extends ILoginService {
     };
     try {
       var returnData =await _dio.post("${ac.url}auth/register");
-      _getStorage.write("token", returnData.data.toString());
+      var _success = TokenModel.fromJson(returnData.data);
+      _getStorage.write("token", _success.token.toString());
+      _getStorage.write("refreshToken", _success.refreshToken.toString());
+      _getStorage.write("client", _success.clientId.toString());
       _getStorage.write("isLogin", true);
-      return Success(TokenModel.fromJson(returnData.data));
+      return Success(_success);
     } on DioError catch (e) {
       return Error(ErrorHandling().handle(error: e));
     }

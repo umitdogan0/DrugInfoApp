@@ -7,8 +7,10 @@ final class ErrorHandling {
       return "You are not authanticated to access this resource";
   }
   else{
-    var error1 =APIErrorModel.fromJson(error.response?.data);
-    return error1.Detail.toString();
+    if(error.response?.data != null){
+      return  APIErrorModel.fromJson(error.response?.data).Detail.toString();
+    }
+   return "Something went wrong";
   }
 }
 }
