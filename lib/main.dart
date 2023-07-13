@@ -66,12 +66,7 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-      if(searchController.value.text != null) {
-        drug = getDrugByName(searchController.value.text);
-      }
-      else {
-        drug = getDrugByName("advil");
-      }
+    drug = getDrugByName(name :"advil");
   }
 
   var isClick = false;
@@ -83,7 +78,7 @@ class MyHomePageState extends State<MyHomePage> {
     isShowTextField = !isShowTextField;
   }
 
-  Future<DrugModel> getDrugByName(name) async {
+  Future<DrugModel> getDrugByName({required String name}) async {
     var service = await DrugService().getDrugByName(name: name);
     return service.when((success) {
       print("success");
@@ -130,7 +125,7 @@ class MyHomePageState extends State<MyHomePage> {
                       SizedBox(
                         width: 200,
                         height: 50,
-                        child: TextField(
+                        child: TextFormField(
                             controller: searchController,
                             autocorrect: true,
                             decoration: InputDecoration(
@@ -144,9 +139,8 @@ class MyHomePageState extends State<MyHomePage> {
                           onPressed: () {
                             setState(() {
                             changeShowTextField();
-                             drug= getDrugByName(searchController.value.text);
-                             print("ofof ${searchController.value.text}");
                             isClick = true;
+                            drug = getDrugByName(name : searchController.text);
                             },);
                             
                           },
@@ -178,7 +172,7 @@ class MyHomePageState extends State<MyHomePage> {
               );
                 }
                 else {
-                  return Text(snapshot.error.toString());
+                  return const Center(child: CircularProgressIndicator());
                 }
               }),
             
