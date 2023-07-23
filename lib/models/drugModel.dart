@@ -48,12 +48,9 @@ class DrugModel {
   );
 
   factory DrugModel.fromJson(Map<dynamic,dynamic> json){
-    var AIlist = json["active_ingredients"] as List;
-    var AIconverted = AIlist.map((e) => ActiveIngredientModel.fromJson(e)).toList();
-    var Plist = json["packaging"] as List;
-    var Pconverted = Plist.map((e) => PackagingModel.fromJson(e)).toList();
-
-    final routeList = (json['route'] as List<dynamic>)
+    var AIlist = json["active_ingredients"] == null ? null : (json["active_ingredients"] as List<dynamic>).map((e) => ActiveIngredientModel.fromJson(e)).toList();
+    var Plist = json["packaging"] == null ? null : (json["packaging"] as List<dynamic>).map((e) => PackagingModel.fromJson(e)).toList() ;
+    final routeList = json['route']==null ? null :  (json['route'] as List<dynamic>)
       .map((dynamic item) => item as String?)
       .toList();
 
@@ -61,6 +58,6 @@ class DrugModel {
         .map((dynamic item) => item as String?)
         .toList();
 
-    return DrugModel(json["drug_name"], json["product_ndc"], json["generic_name"],  json["labeler_name"],  json["brand_name"],  AIconverted,  json["finished"],  Pconverted,  json["listing_expiration_date"],  OpenfdaModel.fromJson(json["openfda"]),  json["marketing_category"],  json["dosage_form"],  json["spl_id"],  json["product_type"],  routeList,  json["marketing_start_date"],  json["product_id"],  json["application_number"],  json["brand_name_base"],pharmClassList);
+    return DrugModel(json["drug_name"], json["product_ndc"], json["generic_name"],  json["labeler_name"],  json["brand_name"],  AIlist,  json["finished"],  Plist,  json["listing_expiration_date"],  OpenfdaModel.fromJson(json["openfda"]),  json["marketing_category"],  json["dosage_form"],  json["spl_id"],  json["product_type"],  routeList,  json["marketing_start_date"],  json["product_id"],  json["application_number"],  json["brand_name_base"],pharmClassList);
   }
 }

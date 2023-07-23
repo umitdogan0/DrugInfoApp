@@ -8,5 +8,7 @@ class ApiConnection {
     return _instance!;
   }
   String url = "https://localhost:7091/api/";
+
+  String nodeUrl = "https://druginfo.onrender.com/users";
   
 }

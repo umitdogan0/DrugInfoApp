@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:drug_info_app/core/utilities/APIConnection.dart';
+import 'package:drug_info_app/core/utilities/errorHandling.dart';
 import 'package:drug_info_app/core/utilities/jwt_helper.dart';
 import 'package:drug_info_app/models/token_model.dart';
 import 'package:get_storage/get_storage.dart';
@@ -11,23 +12,23 @@ class DioInterceptor extends Interceptor{
   final _jwtHelper = JwtHelper.instance;
   final _storage = GetStorage();
   final _dio = Dio();
-  String? _token;
   final _apiConnection = ApiConnection.instance;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async{
     String? _token =await _jwtHelper.getToken();
-    String? refreshToken =await _jwtHelper.getRefreshToken();
-    String? client =await _jwtHelper.getClient();
-    if(refreshToken == null){
+    print(_token);
+    String? _refreshToken =await _jwtHelper.getRefreshToken();
+    String? _client =await _jwtHelper.getClient();
+    if(_refreshToken == null){
        handler.next(options);
     }
     var userId =await _jwtHelper.getUserId(_token!);
     if(await _jwtHelper.isTokenExpired(_token)){
       var result =await _dio.post("${_apiConnection.url}Auth/RefreshToken", data: {
-        "refreshToken": refreshToken,
+        "refreshToken": _refreshToken,
         "userId": userId,
-        "client": client
+        "client": _client
       });
         
         var token = TokenModel.fromJson(result.data);
@@ -48,7 +49,7 @@ class DioInterceptor extends Interceptor{
 
   @override
   void onError(DioError err, ErrorInterceptorHandler handler) {
-    // TODO: implement onError
+    ErrorHandling().handle(error: err);
     super.onError(err, handler);
   }
 }

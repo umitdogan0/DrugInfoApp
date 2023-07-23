@@ -3,7 +3,6 @@ import 'package:drug_info_app/core/utilities/APIConnection.dart';
 import 'package:drug_info_app/core/utilities/dio_client.dart';
 import 'package:drug_info_app/core/utilities/errorHandling.dart';
 import 'package:drug_info_app/models/drugModel.dart';
-import 'package:get/get.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 abstract class IDrugService {
@@ -12,6 +11,12 @@ abstract class IDrugService {
 }
 
 class DrugService extends IDrugService{
+  DrugService._();
+  static DrugService? _instance;
+  static DrugService get instance {
+    _instance ??= DrugService._();
+    return _instance!;
+  }
 
   
 
@@ -20,21 +25,22 @@ class DrugService extends IDrugService{
   @override
   Future<Result<DrugModel,String>> getDrugByName({required String name}) async{
     try {
-      var drugData = await dio.get("https://localhost:7091/api/Drugs/GetByNameDrug?Name="+name);
-      print("drugData");
+      var drugData = await dio.get("https://localhost:7091/api/Drugs/GetByNameDrug?Name=$name");
       var data = DrugModel.fromJson(drugData.data);
       return Success(data);
-    }on DioError catch (e) {
+    } on DioError catch (e) {
       return Error(ErrorHandling().handle(error: e));
-
     }
       
     }
+
+  
     
       @override
       Future<Result<List<DrugModel>?, String>> getDrugByUser({required String userId}) async{
        try{
         var drugData = await dio.get("https://localhost:7091/api/Drugs/GetAllByUserIdDrug?UserId=$userId");
+        
         if(!drugData.data){
           return Success(null);
         }
