@@ -20,7 +20,7 @@ class UserDrugService extends IUserDrugService{
   final _dio = DioClient().dio;
   Future<Result<List<DrugModel>,String>> getAllDrugByUserId(String userId) async{
     try {
-      var result =await _dio.get("http://localhost:3000/users");
+      var result =await _dio.get(ApiConnection.instance.nodeUrl);
       var data = (result.data as List).map((e) => DrugModel.fromJson(e)).toList();
       return Success(data);
     }on DioError catch (e) {

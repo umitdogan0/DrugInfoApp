@@ -17,7 +17,6 @@ class DioInterceptor extends Interceptor{
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async{
     String? _token =await _jwtHelper.getToken();
-    print(_token);
     String? _refreshToken =await _jwtHelper.getRefreshToken();
     String? _client =await _jwtHelper.getClient();
     if(_refreshToken == null){
