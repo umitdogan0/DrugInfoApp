@@ -9,23 +9,24 @@ import 'package:drug_info_app/core/components/customSnackBar.dart';
 import 'package:drug_info_app/core/localization/LocalizationData.dart';
 import 'package:drug_info_app/core/utilities/LaunchSettings.dart';
 import 'package:drug_info_app/core/utilities/jwt_helper.dart';
-import 'package:drug_info_app/core/utilities/loadingTool.dart';
 import 'package:drug_info_app/models/drugModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
 void main() async {
   await GetStorage.init();
-  LaunchSettings().Settings();
 
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
-}
+              LaunchSettings().Settings();
 
-class MyApp extends StatelessWidget {
+    WidgetsFlutterBinding.ensureInitialized();
+    runApp(MyApp());
+  }
+
+  class MyApp extends StatelessWidget {
   final box = GetStorage();
 
   MyApp({super.key});
@@ -33,11 +34,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (_) => LoginCubit(LoginService.instance)),
-          BlocProvider(
-              create: (_) =>
+  return MultiBlocProvider(
+  providers: [
+  BlocProvider(create: (_) => LoginCubit(LoginService.instance)),
+  BlocProvider(create: (_) =>
                   HomeCubit(DrugService.instance, UserDrugService.instance,JwtHelper.instance.getUserIdsync(JwtHelper.instance.getTokenSync()!)!,context))
         ],
         child: GetMaterialApp(
@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
                       displayColor: Colors.white, bodyColor: Colors.white))
               : ThemeData(
                   colorScheme:
-                      ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+                      ColorScheme.fromSeed(seedColor:const Color(0xFF116A7B)),
                   scaffoldBackgroundColor: const Color(0XFFdedede),
                   useMaterial3: true,
                 ),
@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({super.key});
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => MyHomePageState();
@@ -103,7 +103,7 @@ class MyHomePageState extends State<MyHomePage> {
 
  final form = FormGroup({
     'name': FormControl<String>(
-        validators: [Validators.required ]),
+        validators: []),
   });
   final token = GetStorage().read("token");
 
@@ -114,7 +114,7 @@ class MyHomePageState extends State<MyHomePage> {
           HomeCubit(DrugService.instance, UserDrugService.instance,JwtHelper.instance.getUserIdsync(JwtHelper.instance.getTokenSync()!)!,context),
       child: Scaffold(
           appBar: AppBar(
-              backgroundColor: Color(0xFF5A96E3),
+              backgroundColor: Color(0xFFCDC2AE),
               actions: [
                 BlocSelector<HomeCubit, HomeCubitState, bool>(
                   selector: (state) {
@@ -163,10 +163,7 @@ class MyHomePageState extends State<MyHomePage> {
                                 child: ReactiveTextField(
                                     formControlName: 'name',
                                     autocorrect: true,
-                                    validationMessages: {
-                                      'required': (error) =>
-                                          "The name must not be empty",
-                                    },
+                                    
                                     decoration: InputDecoration(
                                         hintText: 'Search'.tr,
                                         border: const OutlineInputBorder(
@@ -177,16 +174,14 @@ class MyHomePageState extends State<MyHomePage> {
                             ),
                             IconButton(
                                 onPressed: () {
-                                      if(form.valid){
+                                      if(form.control("name").value != null && form.control("name").value != ""){
                                       context
                                           .read<HomeCubit>()
                                           .changeTextField();
-                                      // context
-                                      //     .read<HomeCubit>()
-                                      //     .changeSearch(value: true);
 
                                       context.read<HomeCubit>().getDrugByName(
                                           context, form.control("name").value);
+                                          form.control("name").value = "";
                                       }
                                       else{
                                         CustomSnackBar().show(context, 'Please enter some text');
@@ -203,84 +198,61 @@ class MyHomePageState extends State<MyHomePage> {
                   })),
           body: Column(
             children: [
-              BlocSelector<HomeCubit, HomeCubitState, bool>(
-                selector: (state) {
-                  return state.isSearch;
-                },
-                builder: (context, state) {
-                  return BlocBuilder<HomeCubit, HomeCubitState>(
-                      builder: (context, state) {
-                    if (state.isSearch) {
-                      return SizedBox(
-                          height: 100,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: 1,
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () {},
-                                  child: SizedBox(
-                                    width: 200,
-                                    child: Card(
-                                        child: Stack(
-                                      children: [
-                                        state.searchData?.drug_name != null ? 
-                                        Text(state.searchData!.drug_name!) : LoadingTool().loading(),
-                                        Align(
-                                          alignment: Alignment.topRight,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              context
-                                                  .read<HomeCubit>()
-                                                  .changeSearch(value: false);
-                                            },
-                                            child: Icon(
-                                              Icons.close,
-                                            ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left:10.0,top:5),
+                    child: Text("Last Viewed", style: GoogleFonts.inter(fontSize: 20,fontWeight: FontWeight.bold),),
+                  ),
+                  BlocSelector<HomeCubit, HomeCubitState, bool>(
+                    selector: (state) {
+                      return true;
+                    },
+                    
+                    builder: (context, state) {
+                      return BlocBuilder<HomeCubit, HomeCubitState>(
+                        
+                          builder: (context, state) {
+                            return state.searchedData == null ?  Text("Last Viewed Data Is Empty",style: GoogleFonts.inter(fontWeight: FontWeight.w500),) : 
+                            Padding(
+                              padding: const EdgeInsets.only(left:10.0,top: 5),
+                              child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                          color: Color.fromARGB(255, 151, 151, 151)
+                                        ),
+                                        height: 100,
+                                          child: Ink(
+                                            width: state.searchedData!.length * 100.0 + 100,
+                                              child: ListView.builder(
+                                                    scrollDirection: Axis.horizontal,
+                                                    itemCount: state.searchedData!.length,
+                                                    itemBuilder: (context, index) {
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          context.read<HomeCubit>().bottomSheet(drugModel: state.searchedData![index],context: context);
+                                                        },
+                                                        child:SizedBox(
+                                                          width: 100,
+                                                          child: Card(
+                                                          
+                                                              child: Align(
+                                                                alignment: Alignment.center,
+                                                                child: Text(state
+                                                                    .searchedData![index].drug_name!, style: GoogleFonts.inter(fontSize: 15,fontWeight: FontWeight.bold),
+                                                                                                            )                                                  )),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
                                           ),
-                                        )
-                                      ],
-                                    )),
-                                  ),
-                                );
-                              },
-                            ),
-                        );
-                    } else {
-                      if (state.searchedData == null) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      return SingleChildScrollView(
-                        child: Visibility(
-                              child: SizedBox(
-                                height: 100,
-                                  child: Ink(
-                                    color: Colors.red,
-                                    width: 200*state.searchedData!.length.toDouble() + 50,
-                                    child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: state.searchedData!.length,
-                                      itemBuilder: (context, index) {
-                                        return GestureDetector(
-                                          onTap: () {
-                                            _showMyDialog(context: context, drugModel: state.searchedData![index]);
-                                          },
-                                          child: SizedBox(
-                                            width: 200,
-                                            child: Card(
-                                                child: Text(state
-                                                    .searchedData![index].drug_name!)),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                              ),
-                            visible: state.isSearch ? false : true),
-                      );
-                    }
-                  });
-                },
+                                      ),
+                            );
+                      });
+                    },
+                  ),
+                ],
               )
             ],
           )),
