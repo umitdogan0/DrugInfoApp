@@ -1,9 +1,14 @@
+import 'dart:ui';
+
 import 'package:drug_info_app/Application/Cubits/home/home_cubit.dart';
 import 'package:drug_info_app/Application/Cubits/home/home_cubit_state.dart';
 import 'package:drug_info_app/Application/Cubits/login/login_cubit.dart';
+import 'package:drug_info_app/Application/Cubits/profile/profile_cubit.dart';
+import 'package:drug_info_app/Application/Cubits/profile/profile_cubit_state.dart';
 import 'package:drug_info_app/Application/Services/drugService.dart';
 import 'package:drug_info_app/Application/Services/auth_service.dart';
 import 'package:drug_info_app/Application/Services/user_drug_service.dart';
+import 'package:drug_info_app/Views/ProfilePage.dart';
 import 'package:drug_info_app/Views/login_page.dart';
 import 'package:drug_info_app/core/components/customSnackBar.dart';
 import 'package:drug_info_app/core/localization/LocalizationData.dart';
@@ -37,10 +42,12 @@ void main() async {
   return MultiBlocProvider(
   providers: [
   BlocProvider(create: (_) => LoginCubit(LoginService.instance)),
+  BlocProvider(create: (_) => ProfileCubit()),
   BlocProvider(create: (_) =>
                   HomeCubit(DrugService.instance, UserDrugService.instance,JwtHelper.instance.getUserIdsync(JwtHelper.instance.getTokenSync()!)!,context))
         ],
-        child: GetMaterialApp(
+        child: BlocBuilder<ProfileCubit,ProfileCubitState>(builder:(context, state) {
+          return GetMaterialApp(
           title: 'Flutter Demo',
           initialRoute: '/',
           debugShowCheckedModeBanner: false,
@@ -48,19 +55,28 @@ void main() async {
               ? const Locale('en', 'US')
               : const Locale('tr', 'TR'),
           translations: LocalizationData(),
-          theme: box.read("darkMode") as bool
-              ? ThemeData.dark().copyWith(
+          themeMode: box.read("darkMode") as bool ? ThemeMode.dark : ThemeMode.light,
+          darkTheme: ThemeData.dark().copyWith(
                   primaryColor: Colors.red,
                   textTheme: Theme.of(context).textTheme.apply(
-                      displayColor: Colors.white, bodyColor: Colors.white))
-              : ThemeData(
+                      displayColor: Colors.white, bodyColor: Colors.white),
+                  useMaterial3: true,),
+          
+          theme:ThemeData.light().copyWith(
                   colorScheme:
                       ColorScheme.fromSeed(seedColor:const Color(0xFF116A7B)),
                   scaffoldBackgroundColor: const Color(0XFFdedede),
+                  textTheme: Theme.of(context).textTheme.apply(
+                        fontSizeFactor: 1.0,
+                        displayColor: Colors.black, bodyColor: Colors.black
+                      ),
                   useMaterial3: true,
                 ),
-          home: box.read("isLogin") as bool ? MyHomePage() : LoginPage(),
-        ));
+          home: box.read("isLogin") ? const MyHomePage() : LoginPage(),
+          //box.read("isLogin") ? const MyHomePage() : LoginPage()
+        );
+        }, )
+        );
   }
 }
 
@@ -72,6 +88,86 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> {
+
+  PreferredSizeWidget _buildBlurredAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      flexibleSpace: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            color: Colors.transparent.withOpacity(0.1), // Adjust the opacity as needed
+            
+          ),
+        ),
+      ),
+              actions: [
+                BlocSelector<HomeCubit, HomeCubitState, bool>(
+                  selector: (state) {
+                    return state.isShowTextField;
+                  },
+                  builder: (context, state) {
+                    return BlocBuilder<HomeCubit, HomeCubitState>(
+                        builder: (context, state) {
+                      if (state.isShowTextField) {
+                        return Container();
+                      }
+                      return Row(
+                        children: [
+
+
+
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+                            },
+                            child:const Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                    'https://picsum.photos/250?image=9'),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    });
+                  },
+                )
+              ],
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    // height: MediaQuery.of(context).size.height * 0.05,
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    height: 50,
+                    child: SearchBar(
+                      controller: deneme,
+                    ),
+                  ),
+
+                  IconButton(
+
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      if(deneme.text != null && deneme.text != ""){
+                        context
+                            .read<HomeCubit>()
+                            .changeTextField();
+
+                        context.read<HomeCubit>().getDrugByName(
+                            context, deneme.text);
+                        deneme.text = "";
+                      }
+                      else{
+                        CustomSnackBar().show(context, 'Please enter some text');
+                      }
+                    },
+                  ),
+                ],));
+  }
 
   Future<void> _showMyDialog({required context,required DrugModel drugModel}) async {
   return showDialog<void>(
@@ -101,109 +197,33 @@ class MyHomePageState extends State<MyHomePage> {
   );
 }
 
+ 
+
  final form = FormGroup({
     'name': FormControl<String>(
         validators: []),
   });
+
+  var deneme = TextEditingController();
   final token = GetStorage().read("token");
 
   @override
   Widget build(BuildContext context) {
+
     return BlocProvider<HomeCubit>(
       create: (context) =>
           HomeCubit(DrugService.instance, UserDrugService.instance,JwtHelper.instance.getUserIdsync(JwtHelper.instance.getTokenSync()!)!,context),
       child: Scaffold(
-          appBar: AppBar(
-              backgroundColor: Color(0xFFCDC2AE),
-              actions: [
-                BlocSelector<HomeCubit, HomeCubitState, bool>(
-                  selector: (state) {
-                    return state.isShowTextField;
-                  },
-                  builder: (context, state) {
-                    return BlocBuilder<HomeCubit, HomeCubitState>(
-                        builder: (context, state) {
-                      if (state.isShowTextField) {
-                        return Container();
-                      }
-                      return Row(
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                context.read<HomeCubit>().changeTextField();
-                              },
-                              icon: Icon(Icons.search)),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                  'https://picsum.photos/250?image=9'),
-                            ),
-                          ),
-                        ],
-                      );
-                    });
-                  },
-                )
-              ],
-              title: BlocSelector<HomeCubit, HomeCubitState, bool>(
-                  selector: (state) => state.isShowTextField,
-                  builder: (context, state) {
-                    return BlocBuilder<HomeCubit, HomeCubitState>(
-                        builder: (context, state) {
-                      if (state.isShowTextField) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ReactiveForm( 
-                              formGroup: this.form,
-                              child: SizedBox(
-                                width: 200,
-                                height: 50,
-                                child: ReactiveTextField(
-                                    formControlName: 'name',
-                                    autocorrect: true,
-                                    
-                                    decoration: InputDecoration(
-                                        hintText: 'Search'.tr,
-                                        border: const OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(50)),
-                                        ))),
-                              ),
-                            ),
-                            IconButton(
-                                onPressed: () {
-                                      if(form.control("name").value != null && form.control("name").value != ""){
-                                      context
-                                          .read<HomeCubit>()
-                                          .changeTextField();
-
-                                      context.read<HomeCubit>().getDrugByName(
-                                          context, form.control("name").value);
-                                          form.control("name").value = "";
-                                      }
-                                      else{
-                                        CustomSnackBar().show(context, 'Please enter some text');
-                                      }
-                                      
-                                },
-                                icon: Icon(Icons.search))
-                          ],
-                        );
-                      } else {
-                        return Container();
-                      }
-                    });
-                  })),
+        extendBodyBehindAppBar: true,
+          appBar: _buildBlurredAppBar(context),
           body: Column(
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(left:10.0,top:5),
-                    child: Text("Last Viewed", style: GoogleFonts.inter(fontSize: 20,fontWeight: FontWeight.bold),),
+                    padding: const EdgeInsets.only(left:10.0,top:60),
+                    child: Text("Last Viewed".tr, style: GoogleFonts.inter(fontSize: 20,fontWeight: FontWeight.bold),),
                   ),
                   BlocSelector<HomeCubit, HomeCubitState, bool>(
                     selector: (state) {
@@ -214,9 +234,9 @@ class MyHomePageState extends State<MyHomePage> {
                       return BlocBuilder<HomeCubit, HomeCubitState>(
                         
                           builder: (context, state) {
-                            return state.searchedData == null ?  Text("Last Viewed Data Is Empty",style: GoogleFonts.inter(fontWeight: FontWeight.w500),) : 
+                            return state.searchedData == null ?  Text("Last Viewed Data Is Empty".tr,style: GoogleFonts.inter(fontWeight: FontWeight.w500),) : 
                             Padding(
-                              padding: const EdgeInsets.only(left:10.0,top: 5),
+                              padding: const EdgeInsets.only(left:10.0),
                               child: Container(
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(10),

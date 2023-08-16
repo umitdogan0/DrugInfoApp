@@ -1,3 +1,5 @@
+import 'package:drug_info_app/Views/ProfilePage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -110,13 +112,12 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Settings".tr),
-        backgroundColor: Color(0xFF5A96E3),
+        leading: IconButton(onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfilePage())), icon: const Icon(CupertinoIcons.arrowtriangle_left)),
       ),
       body: Column(
         children: [ 
         languageContainer(context),
         SizedBox(height: 20,),
-        themeContainer()
         ],
       ),
     );

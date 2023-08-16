@@ -50,6 +50,10 @@ dependencies:
   blurrycontainer: ^1.0.2
   reactive_forms: ^16.0.1
   jwt_decoder: ^2.0.1
+  flutter_blurhash: ^0.7.0
+  babstrap_settings_screen: ^0.1.6
+  line_awesome_flutter: ^2.0.0
+  graphql_flutter: ^5.2.0-beta.5
 
 dev_dependencies:
   flutter_test:

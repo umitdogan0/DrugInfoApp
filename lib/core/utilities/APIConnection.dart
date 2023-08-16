@@ -10,6 +10,6 @@ class ApiConnection {
   String url = "https://localhost:7091/api/";
 
 
-  String nodeUrl = "https://druginfo.onrender.com/users";
+  String nodeUrl = "http://localhost:3000/users";
   
 }

@@ -11,7 +11,9 @@ class LocalizationData extends Translations {
       'Language_ref':'Language',
       'Edit':'Edit',
       'White Theme':'White Theme',
-      'Loading':'Loading'
+      'Loading':'Loading',
+      "Last Viewed" : "Last Viewed",
+      "Last Viewed Data Is Empty" : "Last Viewed Data Is Empty",
     },
     'tr_TR':{
       'Search':'arama yap',
@@ -20,7 +22,9 @@ class LocalizationData extends Translations {
       'Language_ref':'Dil Tericihi',
       'Edit':'Düzenle',
       'White Theme':'Beyaz Tema',
-      'Loading':'Yükleniyor'
+      'Loading':'Yükleniyor',
+      "Last Viewed" : "Son Görüntülenen",
+      "Last Viewed Data Is Empty" : "Son Görüntülenen Veri Boş",
     }
   };
   
