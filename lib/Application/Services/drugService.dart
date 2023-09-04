@@ -25,7 +25,7 @@ class DrugService extends IDrugService{
   @override
   Future<Result<DrugModel,String>> getDrugByName({required String name}) async{
     try {
-      var drugData = await dio.get("https://localhost:7091/api/Drugs/GetByNameDrug?Name=$name");
+      var drugData = await dio.get("${ac.url}Drugs/GetByNameDrug?Name=$name");
       var data = DrugModel.fromJson(drugData.data);
       return Success(data);
     } on DioError catch (e) {
@@ -39,7 +39,7 @@ class DrugService extends IDrugService{
       @override
       Future<Result<List<DrugModel>?, String>> getDrugByUser({required String userId}) async{
        try{
-        var drugData = await dio.get("https://localhost:7091/api/Drugs/GetAllByUserIdDrug?UserId=$userId");
+        var drugData = await dio.get(ac.nodeUrl);
         
         if(!drugData.data){
           return Success(null);

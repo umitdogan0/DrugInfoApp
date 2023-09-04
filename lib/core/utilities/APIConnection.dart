@@ -7,9 +7,9 @@ class ApiConnection {
     _instance ??= ApiConnection._();
     return _instance!;
   }
-  String url = "https://localhost:7091/api/";
+  String url = "https://druginfoud.azurewebsites.net/api/";
 
 
-  String nodeUrl = "http://localhost:3000/users";
+  String nodeUrl = "https://druginfo.onrender.com/graphql";
   
 }

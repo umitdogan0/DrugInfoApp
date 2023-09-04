@@ -47,8 +47,11 @@ class RegisterPage extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(
-                              width:200 ,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                              width:100 ,
                               child: ReactiveTextField(
                                   formControlName: 'first_name',
                                   decoration: InputDecoration(
@@ -59,9 +62,9 @@ class RegisterPage extends StatelessWidget {
                                         "The first name must not be empty"
                                   }),
                             ),
-
+                              SizedBox(width: 10,),
                              SizedBox(
-                              width:200 ,
+                              width:100 ,
                               child: ReactiveTextField(
                                   formControlName: 'last_name',
                                   decoration: InputDecoration(
@@ -72,6 +75,8 @@ class RegisterPage extends StatelessWidget {
                                         "The last name must not be empty"
                                   }),
                             ),
+                            ],),
+                            
                             SizedBox(
                               width:200 ,
                               child: ReactiveTextField(

@@ -1,7 +1,7 @@
 import 'package:get_storage/get_storage.dart';
 
 class LocalStorage {
-   LocalStorage._();
+  LocalStorage._();
   static LocalStorage? _instance;
   static LocalStorage get instance {
     _instance ??= LocalStorage._();
@@ -10,7 +10,7 @@ class LocalStorage {
   final box = GetStorage();
 
   void write(String key, dynamic value){
-    box.writeInMemory(key, value);
+    box.write(key, value);
   }
 
   Future<void> writeAsync(String key, dynamic value) async{
@@ -18,8 +18,8 @@ class LocalStorage {
     
   }
 
-  void read(String key){
-    box.read(key);
+  dynamic read(String key){
+   return box.read(key);
   }
 
   Future<dynamic> readAsync(String key) async{
